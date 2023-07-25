@@ -31,12 +31,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                                     FilterChain chain)
             throws ServletException, IOException {
         final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (!header.startsWith("Bearer ")) {
+        if (header == null || !header.startsWith("Bearer ")) {
             log.warn("Authorization Header does not start with Bearer");
             chain.doFilter(request, response);
             return;
         }
 
+        // 토큰만 가져오기
         final String token = header.split(" ")[1].trim();
         User userDetails = userService.loadUserByUsername(JwtTokenUtils.getUsername(token, secretKey));
 
