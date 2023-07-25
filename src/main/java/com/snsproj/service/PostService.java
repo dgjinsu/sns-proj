@@ -2,6 +2,7 @@ package com.snsproj.service;
 
 import com.snsproj.exception.ErrorCode;
 import com.snsproj.exception.SimpleSnsApplicationException;
+import com.snsproj.model.Post;
 import com.snsproj.model.entity.PostEntity;
 import com.snsproj.model.entity.UserEntity;
 import com.snsproj.repository.PostRepository;
@@ -22,7 +23,21 @@ public class PostService {
                 .orElseThrow(() -> new SimpleSnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
 
         PostEntity saved = postRepository.save(PostEntity.of(title, body, userEntity));
+    }
 
+    public Post modify(String title, String body, String userName, Integer postId) {
+        UserEntity userEntity = userRepository.findByUserName(userName)
+                .orElseThrow(() -> new SimpleSnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
 
+        PostEntity postEntity = postRepository.findById(postId)
+                .orElseThrow(() -> new SimpleSnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+
+        if (postEntity.getUser() != userEntity) {
+            throw new SimpleSnsApplicationException(ErrorCode.INVALID_PERMISSION, String.format("%s has no permission with %s", userName, postId));
+        }
+
+        postEntity.setTitle(title);
+        postEntity.setBody(body);
+        return Post.fromEntity(postRepository.saveAndFlush(postEntity));
     }
 }
