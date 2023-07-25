@@ -1,6 +1,5 @@
 package com.snsproj.model.entity;
 
-import com.snsproj.model.UserRole;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,27 +10,23 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 import java.time.Instant;
 
-
 @Setter
 @Getter
 @Entity
-@Table(name = "users")
-@SQLDelete(sql = "UPDATE users SET removed_at = NOW() WHERE id=?")
+@SQLDelete(sql = "UPDATE like SET removed_at = NOW() WHERE id=?")
 @Where(clause = "removed_at is NULL")
 @NoArgsConstructor
-public class UserEntity {
+public class LikeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id = null;
-
-    @Column(name = "user_name", unique = true)
-    private String userName;
-
-    private String password;
-
-    @Enumerated(EnumType.STRING)
-    private UserRole role = UserRole.USER;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    private PostEntity post;
 
     @Column(name = "registered_at")
     private Timestamp registeredAt;
@@ -53,10 +48,10 @@ public class UserEntity {
         this.updatedAt = Timestamp.from(Instant.now());
     }
 
-    public static UserEntity of(String userName, String encodedPwd) {
-        UserEntity entity = new UserEntity();
-        entity.setUserName(userName);
-        entity.setPassword(encodedPwd);
+    public static LikeEntity of(UserEntity user, PostEntity post) {
+        LikeEntity entity = new LikeEntity();
+        entity.setUser(user);
+        entity.setPost(post);
         return entity;
     }
 }

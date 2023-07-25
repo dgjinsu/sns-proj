@@ -14,7 +14,9 @@ public enum ErrorCode {
     DUPLICATED_USER_NAME(HttpStatus.CONFLICT, "Duplicated user name"),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "Token is invalid"),
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "Post not founded"),
-    INVALID_PERMISSION(HttpStatus.UNAUTHORIZED, "Permission is invalid")
+    INVALID_PERMISSION(HttpStatus.UNAUTHORIZED, "Permission is invalid"),
+    DATABASE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Database error occurs"),
+    ALREADY_LIKED(HttpStatus.CONFLICT, "User already liked the post")
     ;
 
     private final HttpStatus status;

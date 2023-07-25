@@ -28,17 +28,9 @@ public class AuthenticationConfiguration extends WebSecurityConfigurerAdapter {
     private String secretKey;
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userService).passwordEncoder(encoder);
-    }
-
-    @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring()
-                .antMatchers("/", "/favicon.ico", "/**/*.png", "/**/*.gif", "/**/*.svg",
-                        "/**/*.jpg", "/**/*.html", "/**/*.css", "/**/*.js", "/manifest.json")
-                .antMatchers("/resources/**")
-                .antMatchers(HttpMethod.POST, "/api/*/users/join", "/api/*/users/login");
+        // 정규표현식에 해당하는 path 들만 authentication 으로 넘어가도록
+        web.ignoring().regexMatchers("^(?!/api/).*");
     }
 
     @Override

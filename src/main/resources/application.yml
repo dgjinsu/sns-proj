@@ -18,5 +18,3 @@ jwt:
   token.expired-time-ms: 2592000000
 
 
-server:
-  port: 8090
