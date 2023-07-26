@@ -2,16 +2,12 @@ package com.snsproj.service;
 
 import com.snsproj.exception.ErrorCode;
 import com.snsproj.exception.SimpleSnsApplicationException;
+import com.snsproj.model.AlarmArgs;
+import com.snsproj.model.AlarmType;
 import com.snsproj.model.Comment;
 import com.snsproj.model.Post;
-import com.snsproj.model.entity.CommentEntity;
-import com.snsproj.model.entity.LikeEntity;
-import com.snsproj.model.entity.PostEntity;
-import com.snsproj.model.entity.UserEntity;
-import com.snsproj.repository.CommentRepository;
-import com.snsproj.repository.LikeRepository;
-import com.snsproj.repository.PostRepository;
-import com.snsproj.repository.UserRepository;
+import com.snsproj.model.entity.*;
+import com.snsproj.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +23,7 @@ public class PostService {
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
     private final CommentRepository commentRepository;
+    private final AlarmRepository alarmRepository;
 
     public void create(String title, String body, String userName) {
         UserEntity userEntity = getUserOrException(userName);
@@ -90,6 +87,10 @@ public class PostService {
 
         //저장
         likeRepository.save(LikeEntity.of(userEntity, postEntity));
+
+        //알람 발생
+        alarmRepository.save(AlarmEntity.of(postEntity.getUser(), AlarmType.NEW_LIKE_ON_POST, new AlarmArgs(userEntity.getId(), postEntity.getId())));
+
     }
 
     public int likeCount(Integer postId) {
@@ -105,6 +106,11 @@ public class PostService {
 
         //comment save
         commentRepository.save(CommentEntity.of(comment, postEntity, userEntity));
+
+        //알람 발생
+        alarmRepository.save(AlarmEntity.of(postEntity.getUser(),
+                AlarmType.NEW_COMMENT_ON_POST,
+                new AlarmArgs(userEntity.getId(), postEntity.getId())));
     }
 
     public Page<Comment> getComments(Integer postId, Pageable pageable) {

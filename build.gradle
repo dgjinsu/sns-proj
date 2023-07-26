@@ -42,6 +42,9 @@ dependencies {
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 
+	//jpa 에서 json 필드 사용
+	implementation("com.vladmihalcea:hibernate-types-52:2.16.2")
+
 	runtimeOnly 'mysql:mysql-connector-java'
 }
 
@@ -73,8 +76,8 @@ task cleanFrontEnd(type: Delete) {
 }
 
 //체인 설정 (순서)
-//npmBuild.dependsOn npmInstall
-//copyFrontEnd.dependsOn npmBuild
-//compileJava.dependsOn copyFrontEnd
-//
-//clean.dependsOn cleanFrontEnd
+npmBuild.dependsOn npmInstall
+copyFrontEnd.dependsOn npmBuild
+compileJava.dependsOn copyFrontEnd
+
+clean.dependsOn cleanFrontEnd
