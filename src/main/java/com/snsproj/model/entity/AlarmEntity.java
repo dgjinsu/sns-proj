@@ -24,7 +24,7 @@ import java.time.Instant;
 @Table(indexes = {
         @Index(name = "user_id_idx", columnList = "user_id")
 })
-@TypeDef(name = "json", typeClass = JsonType.class)
+@TypeDef(name = "json", typeClass = JsonType.class) // json 타입 필드를 사용하기 위해 추가
 public class AlarmEntity {
 
     @Id
@@ -32,7 +32,7 @@ public class AlarmEntity {
     private Integer id = null;
 
     //알람을 받은 사람
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
@@ -40,9 +40,9 @@ public class AlarmEntity {
     @Enumerated(EnumType.STRING)
     private AlarmType alarmType;
 
-    @Type(type = "json") //jsonb 타입은 인덱스를 걸 수 있음.
+    @Type(type = "json")
     @Column(columnDefinition = "json")
-    private AlarmArgs args;
+    private AlarmArgs args; //j son 데이터로 저장
 
     @Column(name = "registered_at")
     private Timestamp registeredAt;

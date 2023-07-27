@@ -1,9 +1,13 @@
 package com.snsproj.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.snsproj.model.entity.UserEntity;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,12 +16,14 @@ import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 
-@Getter
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User implements UserDetails {
 
     private Integer id;
-    private String userName;
+    private String username;
     private String password;
     private UserRole role;
     private Timestamp registeredAt;
@@ -29,7 +35,7 @@ public class User implements UserDetails {
         return new User(
                 entity.getId(),
                 entity.getUserName(),
-                entity.getPassword(),
+                entity.getPassword() ,
                 entity.getRole(),
                 entity.getRegisteredAt(),
                 entity.getUpdatedAt(),
@@ -38,36 +44,32 @@ public class User implements UserDetails {
     }
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.toString()));
     }
 
-    @Override
-    public String getPassword() {
-        return password;
-    }
 
     @Override
-    public String getUsername() {
-        return userName;
-    }
-
-    @Override
+    @JsonIgnore
     public boolean isAccountNonExpired() {
         return removedAt == null;
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonLocked() {
         return removedAt == null;
     }
 
     @Override
+    @JsonIgnore
     public boolean isCredentialsNonExpired() {
         return removedAt == null;
     }
 
     @Override
+    @JsonIgnore
     public boolean isEnabled() {
         return removedAt == null;
     }

@@ -7,6 +7,7 @@ import com.snsproj.model.Alarm;
 import com.snsproj.model.User;
 import com.snsproj.model.entity.UserEntity;
 import com.snsproj.repository.AlarmRepository;
+import com.snsproj.repository.UserCacheRepository;
 import com.snsproj.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +28,7 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
     private final AlarmRepository alarmRepository;
+    private final UserCacheRepository userCacheRepository;
 
     @Value("${jwt.secret-key}")
     private String secretKey;
@@ -37,13 +39,19 @@ public class UserService implements UserDetailsService {
 
     @Override
     public User loadUserByUsername(String userName) throws UsernameNotFoundException {
-        return userRepository.findByUserName(userName).map(User::fromEntity).orElseThrow(
-                () -> new SimpleSnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("userName is %s", userName))
-        );
+        // redis 에 있는지 체크하고 없다면 orElseGet 을 사용하여 db 에서 조회
+        User user = userCacheRepository.getUser(userName)
+                .orElseGet(() -> userRepository.findByUserName(userName).map(User::fromEntity).orElseThrow(
+                        () -> new SimpleSnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("userName is %s", userName))));
+        return user;
     }
 
     public String login(String userName, String password) {
         User savedUser = loadUserByUsername(userName);
+        System.out.println("===================");
+        userCacheRepository.setUser(savedUser);
+
+        //비밀번호 체크
         if (!encoder.matches(password, savedUser.getPassword())) {
             throw new SimpleSnsApplicationException(ErrorCode.INVALID_PASSWORD, String.format("userName is %s", userName));
         }
@@ -61,10 +69,7 @@ public class UserService implements UserDetailsService {
         return User.fromEntity(savedUser);
     }
 
-    public Page<Alarm> alarmList(String userName, Pageable pageable) {
-        UserEntity userEntity = userRepository.findByUserName(userName).orElseThrow(
-                () -> new SimpleSnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("userName is %s", userName)));
-
-        return alarmRepository.findAllByUser(userEntity, pageable).map(Alarm::fromEntity);
+    public Page<Alarm> alarmList(Integer userId, Pageable pageable) {
+        return alarmRepository.findAllByUserId(userId, pageable).map(Alarm::fromEntity);
     }
 }
